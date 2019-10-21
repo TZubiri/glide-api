@@ -10,13 +10,19 @@ def employees():
   #TODO: Set header as text/json
 
   limit = flask.request.args.get('limit')
+  #TODO: Return user error on non positive integer inputs.
   if limit == None :
     limit = 100
-  elif limit > 1000:
-    limit = 1000
+  elif int(limit) > 1000:
+    limit = '1000'
   #TODO: What happens on negative inputs?
 
-  return requests.get(f'{API_URL_ROOT}/employees?limit={limit}').text
+  if offset:= flask.request.args.get('offset'):
+    offset_url_part = '&offset=' + offset
+  else:
+    offset_url_part = ''
+
+  return requests.get(f'{API_URL_ROOT}/employees?limit={limit}{offset_url_part}').text
 
 @app.route('/employees/<int:employee_id>')
 def employee(employee_id):
