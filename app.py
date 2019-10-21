@@ -6,7 +6,7 @@ API_URL_ROOT = 'https://rfy56yfcwk.execute-api.us-west-1.amazonaws.com/bigcorp'
 @app.route("/employees")
 def employees():
   #TODO: check status code
-  #TODO: Choose best proxying mechanism .text might contain unicode magic.
+  #TODO: Choose best proxying mechanism, text might contain unicode magic.
   #TODO: Set header as text/json
 
   limit = flask.request.args.get('limit')
