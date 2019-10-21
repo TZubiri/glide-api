@@ -10,8 +10,11 @@ def employees():
   #TODO: Set header as text/json
 
   limit = flask.request.args.get('limit')
-  if( limit == None ):
+  if limit == None :
     limit = 100
+  elif limit > 1000:
+    limit = 1000
+  #TODO: What happens on negative inputs?
 
   return requests.get(f'{API_URL_ROOT}/employees?limit={limit}').text
 
