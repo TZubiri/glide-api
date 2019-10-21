@@ -1,7 +1,5 @@
 FROM python:3.8-slim-buster
 
-ADD requirements.txt /src/requirements.txt
-
 #RUN pip3 install -r /src/requirements.txt
 
 #Not using requirements.txt to improve development caching for Docker build. If an external tool needs requirements.txt,
