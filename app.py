@@ -22,11 +22,12 @@ def employees():
   else:
     offset_url_part = ''
 
-  return requests.get(f'{API_URL_ROOT}/employees?limit={limit}{offset_url_part}').text
+  return requests.get(f'{API_URL_ROOT}/employees?limit={limit}{offset_url_part}').text,200,{'content-type':'application/json'}
 
 @app.route('/employees/<int:employee_id>')
 def employee(employee_id):
-  return requests.get(f'{API_URL_ROOT}/employees?id={employee_id}').text
+  return requests.get(f'{API_URL_ROOT}/employees?id={employee_id}').text,200,{'content-type':'application/json'}
 
+#TODO: Serve app through apache or nginx
 if __name__ == "__main__":
   app.run(host='0.0.0.0')
