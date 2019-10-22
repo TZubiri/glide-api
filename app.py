@@ -1,5 +1,6 @@
 import flask
 import requests
+import json
 app = flask.Flask('glide')
 API_URL_ROOT = 'https://rfy56yfcwk.execute-api.us-west-1.amazonaws.com/bigcorp'
 cache = {}
@@ -11,11 +12,9 @@ def employees():
   #TODO: Choose best proxying mechanism, text might contain unicode magic.
   #TODO: Set header as text/json
 
-  limit = flask.request.args.get('limit')
+  limit = flask.request.args.get('limit',default = '100')
   #TODO: Return user error on non positive integer inputs.
-  if limit == None :
-    limit = 100
-  elif int(limit) > 1000:
+  if int(limit) > 1000:
     limit = '1000'
   #TODO: What happens on negative inputs?
 
@@ -33,24 +32,36 @@ def employee(employee_id):
   return requests.get(f'{API_URL_ROOT}/employees?id={employee_id}').text,\
          200, {'content-type':'application/json'}
 
-@app.route('/offices')
-def offices():
-    return offices_json(), 200, {'content-type':'application/json'}
 
 @app.route('/departments')
 def departments():
-    return departments_json(), 200, {'content-type': 'application/json'}
+  limit,offset = parse_args(flask.request.args)
+  return json.dumps(departments_json()[offset:offset+limit]),\
+         200, {'content-type': 'application/json'}
 
+@app.route('/offices')
+def offices():
+  limit,offset = parse_args(flask.request.args)
+  return json.dumps(offices_json()[offset:offset+limit]),\
+         200, {'content-type': 'application/json'}
 
+def parse_args(args):
+  limit = args.get('limit',default='100')
+  offset = args.get('offset',default='0')
+  limit = int(limit)
+  offset = int(offset)
+  limit = min(1000,limit)
+
+  return limit,offset
 def load_file_from_memory_or_cache(file: str,force_read:bool = False):
   global cache
   if file not in cache:
     with open(file,'r') as f:
-      cache[file] = f.read()
+      cache[file] = json.loads(f.read())
   return cache[file]
 
 def offices_json():
-  return load_file_from_memory_or_cache('offices_json')
+  return load_file_from_memory_or_cache('offices.json')
 def departments_json():
   return load_file_from_memory_or_cache('departments.json')
 
