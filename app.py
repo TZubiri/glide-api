@@ -40,7 +40,9 @@ def employee(employee_id):
 @app.route('/departments')
 def departments():
   limit,offset = parse_args(flask.request.args)
-  return json.dumps(departments_json()[offset:offset+limit]),\
+  selected_departments = departments_json()[offset:offset+limit]
+  expanded_selected_departments = expand(selected_departments,flask.request.args.getlist('expand'))
+  return json.dumps(expanded_selected_departments),\
          200, {'content-type': 'application/json'}
 
 @app.route('/departments/<int:department_id>')
@@ -55,13 +57,18 @@ def department(department_id):
 @app.route('/offices')
 def offices():
   limit,offset = parse_args(flask.request.args)
-  return json.dumps(offices_json()[offset:offset+limit]),\
+  selected_offices = offices_json()[offset:offset+limit]
+  expanded_selected_offices = expand(selected_offices,flask.request.args.getlist('expand'))
+  return json.dumps(expanded_selected_offices),\
          200, {'content-type': 'application/json'}
 
 @app.route('/offices/<int:office_id>')
-def office(office_id):
-  return offices_json()[office_id+1],\
+def parse_office(office_id):
+  return expand([office(office_id)],flask.request.args.getlist('expand'))[0],\
          200, {'content-type': 'application/json'}
+
+def office(office_id):
+  return office_json()[office_id-1]
 
 def parse_args(args):
   limit = args.get('limit',default='100')
