@@ -2,6 +2,7 @@ import flask
 import requests
 import json
 import typing
+import copy
 
 
 app = flask.Flask('glide')
@@ -44,11 +45,11 @@ def departments():
 
 @app.route('/departments/<int:department_id>')
 def parse_department(department_id):
-  return expand([department(department_id-1)],flask.request.args.getlist('expand'))[0],\
+  return expand([department(department_id)],flask.request.args.getlist('expand'))[0],\
          200, {'content-type': 'application/json'}
 
 def department(department_id):
-  return departments_json()[department_id]
+  return departments_json()[department_id-1]
 
 
 @app.route('/offices')
@@ -71,22 +72,24 @@ def parse_args(args):
 
   return limit,offset
 
-def load_file_from_memory_or_cache(file: str,force_read:bool = False):
+def load_file_from_disk_or_cache(file: str,force_read:bool = False):
   global cache
   if file not in cache:
     with open(file,'r') as f:
       cache[file] = json.loads(f.read())
-  return cache[file]
+
+  # A deep copy provides side effect safety at the expense of duplicating the file in memory.
+  return copy.deepcopy(cache[file])
 
 def offices_json():
-  return load_file_from_memory_or_cache('offices.json')
+  return load_file_from_disk_or_cache('offices.json')
 def departments_json() -> typing.List[typing.Dict]:
-  return load_file_from_memory_or_cache('departments.json')
+  return load_file_from_disk_or_cache('departments.json')
 
 @app.route('/reload_data/4jz06v155')
 def read_json_files():
-  load_file_from_memory_or_cache('offices.json',force_read=True)
-  load_file_from_memory_or_cache('departments.json',force_read =True)
+  load_file_from_disk_or_cache('offices.json',force_read=True)
+  load_file_from_disk_or_cache('departments.json',force_read =True)
 
 def get_object_by_key_and_id(key,id):
   key_to_func = {}
