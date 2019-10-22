@@ -6,7 +6,11 @@ FROM python:3.8-slim-buster
 # we can switch to it later at the expense of redownloading the packages.
 RUN pip3 install flask
 RUN pip3 install requests
+RUN pip3 install gunicorn
 
-ADD . /src/.
+RUN mkdir /src
+WORKDIR /src
 
-ENTRYPOINT python3 /src/app.py
+
+
+ENTRYPOINT ["gunicorn" , "--bind" , "0.0.0.0:5000","wsgi:app"]

@@ -1,0 +1,1 @@
+docker run -v "$(pwd)/.":/src/ --entrypoint=python3 glide-api /src/test.py
