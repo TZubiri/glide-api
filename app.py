@@ -8,7 +8,7 @@ import copy
 app = flask.Flask('glide')
 API_URL_ROOT = 'https://rfy56yfcwk.execute-api.us-west-1.amazonaws.com/bigcorp'
 cache = {}
-
+cache["employees"] = {}
 
 @app.route("/employees")
 def employees():
@@ -27,14 +27,34 @@ def employees():
   else:
     offset_url_part = ''
 
-  return requests.get(f'{API_URL_ROOT}/employees?limit={limit}{offset_url_part}').text,\
+  employees = requests.get(f'{API_URL_ROOT}/employees?limit={limit}{offset_url_part}').json()
+  _cache_employees_from_api(employees)
+  expanded_employees = expand(employees,flask.request.args.getlist('expand'))
+  return json.dumps(expanded_employees) ,\
           200,{'content-type':'application/json'}
 
 
 @app.route('/employees/<int:employee_id>')
+def parse_employee(employee_id):
+  return expand([employee(employee_id)],flask.request.args.getlist('expand'))[0],\
+         200, {'content-type': 'application/json'}
+
 def employee(employee_id):
-  return requests.get(f'{API_URL_ROOT}/employees?id={employee_id}').text,\
-         200, {'content-type':'application/json'}
+  return _get_employee_from_cache_or_api(employee_id)
+
+def _cache_employees_from_api(employees):
+  global cache
+  for employee in employees:
+    cache["employees"][employee["id"]] = employee
+
+def _get_employee_from_cache_or_api(employee_id:int):
+  global cache
+  if employee_id not in cache["employees"]:
+    cache["employees"][employee_id] = _get_employee_from_external_api(employee_id)
+  return copy.deepcopy(cache["employees"][employee_id])
+
+def _get_employee_from_external_api(employee_id):
+  return requests.get(f'{API_URL_ROOT}/employees?id={employee_id}').json()[0]
 
 
 @app.route('/departments')
@@ -68,7 +88,7 @@ def parse_office(office_id):
          200, {'content-type': 'application/json'}
 
 def office(office_id):
-  return office_json()[office_id-1]
+  return offices_json()[office_id-1]
 
 def parse_args(args):
   limit = args.get('limit',default='100')
@@ -109,8 +129,9 @@ def get_object_by_key_and_id(key,id):
 
 def expand(objects_to_expand: typing.List,list_of_list_of_keys_to_expand):
 
-  for object_to_expand in objects_to_expand:
-    for list_of_keys_to_expand in list_of_list_of_keys_to_expand:
+  objects_to_expand = copy.deepcopy(objects_to_expand)
+  for list_of_keys_to_expand in list_of_list_of_keys_to_expand:
+    for object_to_expand in objects_to_expand:
       for key_to_expand in list_of_keys_to_expand.split('.'):
 
       #TODO: Check if field exists.
@@ -118,8 +139,11 @@ def expand(objects_to_expand: typing.List,list_of_list_of_keys_to_expand):
         if key_to_expand in object_to_expand:
           id_to_expand = object_to_expand[key_to_expand]
           if id_to_expand is None:
-            continue
-          object_to_expand[key_to_expand] = get_object_by_key_and_id(key_to_expand,id_to_expand)
+            break
+          #skip expansion if value is already expanded.
+          elif type(id_to_expand) is int:
+            object_to_expand[key_to_expand] = get_object_by_key_and_id(key_to_expand,id_to_expand)
+
           object_to_expand = object_to_expand[key_to_expand]
 
   return objects_to_expand
