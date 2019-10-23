@@ -7,8 +7,13 @@ cache["employees"] = {}
 
 API_URL_ROOT = 'https://rfy56yfcwk.execute-api.us-west-1.amazonaws.com/bigcorp'
 
-def employees(limit,offset_url_part):
+def employees(limit,offset):
     #TODO: get lists from cache as well
+    if offset:
+      offset_url_part = '&offset=' + offset
+    else:
+      offset_url_part = ''
+
     employees = requests.get(f'{API_URL_ROOT}/employees?limit={limit}{offset_url_part}').json()
     _cache_employees_from_api(employees)
     return employees
@@ -42,6 +47,7 @@ def load_file_from_disk_or_cache(file: str,force_read:bool = False):
 
 def offices():
   return load_file_from_disk_or_cache('offices.json')
+
 def departments() -> typing.List[typing.Dict]:
   return load_file_from_disk_or_cache('departments.json')
 

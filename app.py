@@ -21,12 +21,15 @@ def parse_employees():
     limit = '1000'
   #TODO: What happens on negative inputs?
 
-  if offset := flask.request.args.get('offset'):
+  offset = flask.request.args.get('offset')
+  '''
+  if offset := :
     offset_url_part = '&offset=' + offset
   else:
     offset_url_part = ''
+      '''
 
-  employees = sources.employees(limit,offset_url_part)
+  employees = sources.employees(limit,offset)
   expanded_employees = expand(employees,flask.request.args.getlist('expand'))
   return json.dumps(expanded_employees) ,\
           200,{'content-type':'application/json'}
