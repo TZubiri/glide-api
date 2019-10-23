@@ -35,7 +35,7 @@ The second easiest way is to:
 * python3 app.py
 * test the api at http://localhost:5000/employees
 
-#Post-mortem notes:
+# Post-mortem notes:
 
 * Perhaps a json database like MongoDB or ArangoDB could have been used to avoid the development of the Expand engine. This would have also provided some caching mechanisms.
 * Perhaps parametrizing the endpoint string in routes could have avoided a lot of code repetition at the cost of stringifying the business objects (employees, offices).
