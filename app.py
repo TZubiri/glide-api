@@ -149,7 +149,6 @@ def expand(objects_to_expand: typing.List,list_of_list_of_keys_to_expand):
   return objects_to_expand
 
 
-#TODO: Serve app through apache or nginx
 if __name__ == "__main__":
   read_json_files()
   app.run(host='0.0.0.0')

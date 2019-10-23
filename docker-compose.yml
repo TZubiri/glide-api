@@ -1,0 +1,12 @@
+version: '3'
+services:
+  api:
+    build: .
+    volumes:
+    - .:/src
+  nginx:
+    image: nginx:1.17
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
