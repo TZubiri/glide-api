@@ -45,7 +45,7 @@ def load_file_from_disk_or_cache(file: str,force_read:bool = False):
   # A deep copy provides side effect safety at the expense of duplicating the file in memory.
   return copy.deepcopy(cache[file])
 
-def offices():
+def offices() -> typing.List[typing.Dict]:
   return load_file_from_disk_or_cache('offices.json')
 
 def departments() -> typing.List[typing.Dict]:

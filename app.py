@@ -7,13 +7,13 @@ from sources import load_file_from_disk_or_cache
 
 app = flask.Flask('glide')
 
+RESPONSE_HEADERS = {'content-type':'application/json'}
 
 
 @app.route("/employees")
 def parse_employees():
   #TODO: check status code
   #TODO: Choose best proxying mechanism, text might contain unicode magic.
-  #TODO: Set header as text/json
   #TODO: Return user error on non positive integer inputs.
   #TODO: What happens on negative inputs?
 
@@ -21,13 +21,13 @@ def parse_employees():
   employees = sources.employees(limit,offset)
   expanded_employees = expand(employees,flask.request.args.getlist('expand'))
   return json.dumps(expanded_employees) ,\
-          200,{'content-type':'application/json'}
+          200, RESPONSE_HEADERS
 
 
 @app.route('/employees/<int:employee_id>')
 def parse_employee(employee_id):
   return expand([sources.employee(employee_id)],flask.request.args.getlist('expand'))[0],\
-         200, {'content-type': 'application/json'}
+         200, RESPONSE_HEADERS
 
 
 @app.route('/departments')
@@ -36,12 +36,12 @@ def parse_departments():
   selected_departments = sources.departments()[offset:offset+limit]
   expanded_selected_departments = expand(selected_departments,flask.request.args.getlist('expand'))
   return json.dumps(expanded_selected_departments), \
-         200, {'content-type': 'application/json'}
+         200, RESPONSE_HEADERS
 
 @app.route('/departments/<int:department_id>')
 def parse_department(department_id):
   return expand([sources.department(department_id)],flask.request.args.getlist('expand'))[0],\
-         200, {'content-type': 'application/json'}
+         200, RESPONSE_HEADERS
 
 @app.route('/offices')
 def parse_offices():
@@ -49,13 +49,13 @@ def parse_offices():
   selected_offices = sources.offices()[offset:offset+limit]
   expanded_selected_offices = expand(selected_offices,flask.request.args.getlist('expand'))
   return json.dumps(expanded_selected_offices), \
-         200, {'content-type': 'application/json'}
+         200, RESPONSE_HEADERS
 
 
 @app.route('/offices/<int:office_id>')
 def parse_office(office_id):
   return expand([sources.office(office_id)],flask.request.args.getlist('expand'))[0],\
-         200, {'content-type': 'application/json'}
+         200, RESPONSE_HEADERS
 
 def parse_args(args):
   limit = args.get('limit',default='100')
@@ -83,6 +83,8 @@ def get_object_by_key_and_id(key,id):
   return key_to_func[key](id)
 
 def expand(objects_to_expand: typing.List,list_of_list_of_keys_to_expand):
+
+  #TODO: Bundle individual requests and send a bulk request to limit external api hits.
 
   objects_to_expand = copy.deepcopy(objects_to_expand)
   for list_of_keys_to_expand in list_of_list_of_keys_to_expand:
