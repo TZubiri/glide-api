@@ -1,1 +1,1 @@
-docker run -v "$(pwd)/.":/src/ --entrypoint=python3 glide-api /src/test.py
+sudo docker-compose -f docker-compose.test.yml up

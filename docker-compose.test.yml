@@ -1,0 +1,8 @@
+version: '3'
+services:
+  test_api:
+    build: .
+    volumes:
+    - .:/src
+    entrypoint: python3
+    command: /src/test.py
