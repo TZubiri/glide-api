@@ -14,21 +14,10 @@ def parse_employees():
   #TODO: check status code
   #TODO: Choose best proxying mechanism, text might contain unicode magic.
   #TODO: Set header as text/json
-
-  limit = flask.request.args.get('limit',default = '100')
   #TODO: Return user error on non positive integer inputs.
-  if int(limit) > 1000:
-    limit = '1000'
   #TODO: What happens on negative inputs?
 
-  offset = flask.request.args.get('offset')
-  '''
-  if offset := :
-    offset_url_part = '&offset=' + offset
-  else:
-    offset_url_part = ''
-      '''
-
+  limit, offset = parse_args(flask.request.args)
   employees = sources.employees(limit,offset)
   expanded_employees = expand(employees,flask.request.args.getlist('expand'))
   return json.dumps(expanded_employees) ,\
